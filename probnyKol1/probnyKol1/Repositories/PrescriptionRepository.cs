@@ -1,6 +1,7 @@
 using probnyKol1.Interfaces;
 using probnyKol1.Models;
 using System.Data.SqlClient;
+using probnyKol1.DTO;
 
 namespace probnyKol1.Repositories;
 
@@ -49,6 +50,48 @@ public class PrescriptionRepository : IPrescriptionRepository
             return result;
         }
     }
+
+public async Task<Prescription> AddPrescriptionAsync(PrescriptionDTO prescriptionDTO)
+{
+
+    if (prescriptionDTO.DueDate <= prescriptionDTO.Date)
+    {
+        throw new ArgumentException("DueDate must be later than Date.");
+    }
+
+    using (SqlConnection connection = new SqlConnection(_configuration["ConnectionStrings:DefaultConnection"]))
+    {
+        await connection.OpenAsync();
+        
+        Prescription prescription = new Prescription
+        {
+            Date = prescriptionDTO.Date,
+            DueDate = prescriptionDTO.DueDate,
+            IdPatient = prescriptionDTO.IdPatient,
+            IdDoctor = prescriptionDTO.IdDoctor
+        };
+        
+        string query = "INSERT INTO Prescription (Date, DueDate, IdPatient, IdDoctor) " +
+                       "VALUES (@Date, @DueDate, @IdPatient, @IdDoctor)"; 
+
+        using (SqlCommand command = new SqlCommand(query, connection))
+        {
+
+            command.Parameters.AddWithValue("@Date", prescription.Date);
+            command.Parameters.AddWithValue("@DueDate", prescription.DueDate);
+            command.Parameters.AddWithValue("@IdPatient", prescription.IdPatient);
+            command.Parameters.AddWithValue("@IdDoctor", prescription.IdDoctor);
+            
+            int newPrescriptionId = Convert.ToInt32(await command.ExecuteScalarAsync());
+            
+            prescription.IdPrescription = newPrescriptionId;
+            
+            return prescription;
+        }
+    }
+}
+
+
 
     public async Task<string> GetDoctorName(string doctorLastName)
     {

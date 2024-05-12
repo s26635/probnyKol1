@@ -1,8 +1,8 @@
-namespace probnyKol1.Models;
+namespace probnyKol1.DTO;
 
-public class Prescription
+public class PrescriptionDTO
 {
-    public int IdPrescription { set; get; }
+    private int IdPrescription { set; get; }
     public DateTime Date { set; get; }
     public DateTime DueDate { set; get; }
     public int IdPatient { set; get; }
