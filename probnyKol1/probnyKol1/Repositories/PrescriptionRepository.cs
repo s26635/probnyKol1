@@ -58,11 +58,13 @@ public async Task<Prescription> AddPrescriptionAsync(PrescriptionDTO prescriptio
     {
         throw new ArgumentException("DueDate must be later than Date.");
     }
-
+//lub   await using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default")))
     using (SqlConnection connection = new SqlConnection(_configuration["ConnectionStrings:DefaultConnection"]))
     {
         await connection.OpenAsync();
-        
+        //To transakcji ktora sie wykona jak nie rzuci bledami
+        //DbTransaction dbTransaction = await sqlConnection.BeginTransactionAsync();
+        //command.Transaction = dbTransaction as SqlTransaction;
         Prescription prescription = new Prescription
         {
             Date = prescriptionDTO.Date,
@@ -85,7 +87,7 @@ public async Task<Prescription> AddPrescriptionAsync(PrescriptionDTO prescriptio
             int newPrescriptionId = Convert.ToInt32(await command.ExecuteScalarAsync());
             
             prescription.IdPrescription = newPrescriptionId;
-            
+            // dbTransaction.Commit();
             return prescription;
         }
     }
